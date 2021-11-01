@@ -1,8 +1,10 @@
 package com.marcelo.listadecontatos.Lista.de.Contatos.controller;
 
+import com.marcelo.listadecontatos.Lista.de.Contatos.exception.ResourceNotFoundException;
 import com.marcelo.listadecontatos.Lista.de.Contatos.model.Contatos;
 import com.marcelo.listadecontatos.Lista.de.Contatos.repository.ContatosRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,6 +17,13 @@ public class ContatosController {
     @Autowired
     private ContatosRepository contatosRepository;
 
+    //get contato byId
+    @GetMapping("/contatos/{id}")
+    public ResponseEntity<Contatos> getContatoById(@PathVariable Long id) {
+        Contatos contato = contatosRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Contato não existe : " + id));
+        return ResponseEntity.ok(contato);
+    }
+
     //get all contatos
     @GetMapping("/contatos")
     public List<Contatos> getAllContatos() {
@@ -25,6 +34,20 @@ public class ContatosController {
     @PostMapping("/contatos")
     public Contatos createContato(@RequestBody Contatos contato) {
         return contatosRepository.save(contato);
+    }
+
+    // atualizar contato
+    @PutMapping("/contatos/{id}")
+    public ResponseEntity<Contatos> atualizarContato(@PathVariable Long id, @RequestBody Contatos contatoUpdate) {
+        Contatos contato = contatosRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Contato não existe : " + id));
+
+        contato.setNome(contatoUpdate.getNome());
+        contato.setSobrenome(contatoUpdate.getSobrenome());
+        contato.setEmailId(contatoUpdate.getEmailId());
+
+        Contatos updateContato = contatosRepository.save(contato);
+
+        return ResponseEntity.ok(updateContato);
     }
 
 }
